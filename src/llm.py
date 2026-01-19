@@ -1,17 +1,43 @@
 import os
-import json
 import requests
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
 class LLMService():
+    """
+    Service class responsible for interacting with the Mistral LLM API.
+
+    This class handles sending prompts to the LLM, managing requests and responses. 
+    It also handles returning the generated text to the user,
+    acting as an abstraction layer between the application and the underlying language model.
+
+    Attributes:
+        apiKey (str): The API key for authenticating with the Mistral LLM service.
+        model (str): The specific LLM model to use for generating responses.
+
+    Methods:
+        generate_response(prompt): Sends a prompt to the LLM and returns the generated response.
+    """
+    
     def __init__(self, MISTRAL_API_KEY=None, model=None):
         self.apiKey = MISTRAL_API_KEY
-        print(f"MISTRAL_API_KEY set: {self.apiKey}")
         self.model = model  
 
     def generate_response(self, prompt):
+        """
+        Takes a prompt string as input and returns the generated response from the LLM.
+
+        This method constructs the request payload, sends it to the Mistral LLM API,
+        and processes the response to extract the generated text.
+        
+        Arguments:
+            prompt (str): The input prompt to send to the LLM.
+        
+        Returns:
+            content (str): The generated response from the LLM.
+        """
+        
         if not self.apiKey:
             raise ValueError("API key is required")
         
@@ -32,12 +58,10 @@ class LLMService():
         full_response = response.json()
 
         try:
-            content = full_response['choices'][0]['message']['content']
+            content = full_response["choices"][0]["message"]["content"]
             return content
         except (KeyError, IndexError) as e:
             raise Exception("Unexpected response format: " + str(full_response)) from e
-        
-        return response.json()
 
 llm = LLMService(MISTRAL_API_KEY=os.getenv("MISTRAL_API_KEY"), model="mistral-large-2512")    
 
