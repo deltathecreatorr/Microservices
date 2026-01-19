@@ -1,6 +1,5 @@
 import os
 import json
-from click import prompt
 import requests
 from flask import Flask, request, jsonify
 
@@ -40,7 +39,7 @@ class LLMService():
         
         return response.json()
 
-llm = LLMService(MISTRAL_API_KEY=os.getenv("MISTRAL_API_KEY"), model="mistral-7b-instruct-v0.1")    
+llm = LLMService(MISTRAL_API_KEY=os.getenv("MISTRAL_API_KEY"), model="mistral-large-2512")    
 
 @app.route('/llm', methods=['POST'])
 def llm_endpoint():
@@ -66,4 +65,4 @@ def llm_endpoint():
     
 if __name__ == '__main__':
     print("Starting LLM Service...")
-    app.run(port=3000, debug=False)
+    app.run(port=3000, debug=True)
