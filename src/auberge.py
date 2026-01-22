@@ -64,6 +64,14 @@ def sanitise_text(text, guardrails):
 
 @app.route('/auberge', methods=['POST'])
 def auberge():
+    """
+    Handles the 
+    
+    Keyword arguments:
+    argument -- description
+    Return: return_description
+    """
+    
     try:
         data = request.get_json()
         if not data or 'prompt' not in data:
