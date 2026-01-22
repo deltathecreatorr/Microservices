@@ -101,7 +101,11 @@ def list_guardrails():
         response = requests.get(firebase_url)
 
         if response.status_code == 200:
-            return jsonify(response.json()), 200
+            data = response.json()
+            if data is None:
+                return jsonify([]), 200
+            rails = list(data.keys())
+            return jsonify(rails), 200
         else:
             return jsonify({"error": "Failed to list guardrails", "details": response.text}), response.status_code
     except Exception as e:
