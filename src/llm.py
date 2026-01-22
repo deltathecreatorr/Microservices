@@ -67,6 +67,13 @@ llm = LLMService(MISTRAL_API_KEY=os.getenv("MISTRAL_API_KEY"), model="mistral-la
 
 @app.route('/llm', methods=['POST'])
 def llm_endpoint():
+    """
+    Handles POST requests to generate text using the Mistral LLM.
+    
+    Expects a JSON payload with a 'prompt' field.
+    Returns the generated text in a JSON response.
+    """
+    
     try:
         data = request.get_json()
         if not data or 'prompt' not in data:
