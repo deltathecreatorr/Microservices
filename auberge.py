@@ -16,22 +16,20 @@ def get_guardrails():
     of the Guardrails microservice.
     """
     guardrails = []
-    try:
-        response = requests.get(f"{GUARDRAILS_API_URL}")
-        if response.status_code == 200:
-            guardrails_ids = response.json()
+    
+    response = requests.get(f"{GUARDRAILS_API_URL}")
+    if response.status_code == 200:
+        guardrails_ids = response.json()
 
-            if not guardrails_ids:
-                return guardrails
-            
-            for gid in guardrails_ids:
-                guardrail = requests.get(f"{GUARDRAILS_API_URL}/{gid}")
-                if guardrail.status_code == 200:
-                    guardrails.append(guardrail.json())
-        return guardrails
-    except Exception as e:
-        print(f"Error fetching guardrails: {e}")
-        return guardrails
+        if not guardrails_ids:
+            return guardrails
+        
+        for gid in guardrails_ids:
+            guardrail = requests.get(f"{GUARDRAILS_API_URL}/{gid}")
+            if guardrail.status_code == 200:
+                guardrails.append(guardrail.json())
+    return guardrails
+    
     
 def sanitise_text(text, guardrails):
     """
@@ -71,27 +69,24 @@ def auberge():
     argument -- description
     Return: return_description
     """
-    
-    try:
-        data = request.get_json()
-        if not data or 'prompt' not in data:
-            return jsonify({"error": "Missing 'prompt' in request body"}), 400
-        prompt = data['prompt']
+    data = request.get_json()
+    if not data or 'prompt' not in data:
+        return jsonify({"error": "Missing 'prompt' in request body"}), 400
+    prompt = data['prompt']
 
-        active_guardrails = get_guardrails()
-        sanitised_prompt = sanitise_text(prompt, active_guardrails)
+    active_guardrails = get_guardrails()
+    sanitised_prompt = sanitise_text(prompt, active_guardrails)
 
-        llm_payload = {"prompt": sanitised_prompt}
-        llm_response = requests.post(LLM_API_URL, json=llm_payload)
+    llm_payload = {"prompt": sanitised_prompt}
+    llm_response = requests.post(LLM_API_URL, json=llm_payload)
 
-        if llm_response.status_code == 200:
-            llm_output = llm_response.json().get("output", "")
-            sanitised_output = sanitise_text(llm_output, active_guardrails)
-            return jsonify({"output": sanitised_output}), 200
-        else:
-            return jsonify({"error": "LLM service error", "details": llm_response.text}), llm_response.status_code
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    if llm_response.status_code == 200:
+        llm_output = llm_response.json().get("output", "")
+        sanitised_output = sanitise_text(llm_output, active_guardrails)
+        return jsonify({"output": sanitised_output}), 200
+    else:
+        return jsonify({"error": "LLM service error", "details": llm_response.text}), llm_response.status_code
+
 
 if __name__ == "__main__":
     app.run(port=3002, debug=True)
