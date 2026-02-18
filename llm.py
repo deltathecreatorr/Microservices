@@ -81,6 +81,10 @@ def llm_endpoint():
         data = request.get_json()
         if not data or 'prompt' not in data:
             return jsonify({"error": "Missing 'prompt' in request body"}), 400
+        
+        if not isinstance(data['prompt'], str) or not data['prompt'].strip():
+            return jsonify({"error": "'prompt' must be a non-empty string"}), 400
+        
         prompt_text = data['prompt']
         print(f"Received prompt: {prompt_text}")
     except Exception as e:

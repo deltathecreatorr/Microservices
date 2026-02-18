@@ -8,6 +8,8 @@ app = Flask(__name__)
 GUARDRAILS_API_URL = "http://localhost:3001/guardrails"
 LLM_API_URL = "http://localhost:3000/llm"
 
+session = requests.Session()
+
 def get_guardrails():
     """
     Handles gathering all of the guardrails from the DB
@@ -16,8 +18,8 @@ def get_guardrails():
     of the Guardrails microservice.
     """
     guardrails = []
-    
-    response = requests.get(f"{GUARDRAILS_API_URL}")
+   
+    response = session.get(f"{GUARDRAILS_API_URL}")
     if response.status_code == 200:
         guardrails_ids = response.json()
 
@@ -25,7 +27,7 @@ def get_guardrails():
             return guardrails
         
         for gid in guardrails_ids:
-            guardrail = requests.get(f"{GUARDRAILS_API_URL}/{gid}")
+            guardrail = session.get(f"{GUARDRAILS_API_URL}/{gid}")
             if guardrail.status_code == 200:
                 guardrails.append(guardrail.json())
     return guardrails
@@ -78,7 +80,7 @@ def auberge():
     sanitised_prompt = sanitise_text(prompt, active_guardrails)
 
     llm_payload = {"prompt": sanitised_prompt}
-    llm_response = requests.post(LLM_API_URL, json=llm_payload)
+    llm_response = session.post(LLM_API_URL, json=llm_payload)
 
     if llm_response.status_code == 200:
         llm_output = llm_response.json().get("output", "")

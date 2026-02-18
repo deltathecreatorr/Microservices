@@ -11,6 +11,7 @@ def create_guardrail(id):
     Handles the creation of a guardrail
     
     Expects a JSON payload with 'id', a regular expression 'regx', and a substitution string 'sub'.
+    Validates the input, checks for existing guardrail with the same ID, and if valid,
     Stores the guardrail in the Firebase Realtime Database.
     Returns the created guardrail in a JSON response.
     """
@@ -24,7 +25,8 @@ def create_guardrail(id):
     if str(data["id"]) != str(id):
         return jsonify({"error": "ID in URL does not match ID in request body"}), 400
 
-    if database.db.get(id)[0] == 200:
+    status, _ = database.db.get(id)
+    if status == 200:
         return jsonify({"error": f"Guardrail with ID {id} already exists"}), 400
     
     try:
@@ -46,7 +48,10 @@ def delete_guardrail(id):
     Expects the guardrail ID as a parameter in the URL.
     Deletes the guardrail and then returns a success message in a JSON response.
     """
-   
+    status, _ = database.db.get(id)
+    if status != 200:
+        return jsonify({"error": f"Guardrail with ID {id} not found, which means it doesn't exist in the database anyways"}), 404
+
     status_code, response_data = database.db.delete(id)
     if status_code == 200:
         return jsonify({"message": f"Guardrail with ID {id} deleted successfully"}), 200
@@ -81,7 +86,7 @@ def list_guardrails():
     """
     
     rails = database.db.list_ids()
-    return jsonify({rails}), 200
+    return jsonify(rails), 200
 
 if __name__ == '__main__':
     app.run(port=3001, debug=True)

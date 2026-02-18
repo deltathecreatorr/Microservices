@@ -11,7 +11,7 @@ class Database:
             raise ValueError("FIREBASE_DB environment variable is required")
         self.BASE_URL = f"https://{DB_NAME}-default-rtdb.europe-west1.firebasedatabase.app"
         print(f"Database initialized with base URL: {self.BASE_URL}")
-
+        
     def clear(self):
         resp = requests.delete(f"{self.BASE_URL}/guardrails.json")
         return resp.json()
